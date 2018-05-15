@@ -1,0 +1,12 @@
+// $Id: 10-hundred.oc,v 1.7 2018-04-06 13:14:11-07 - - $
+
+#include "oclib.oh"
+
+int main() {
+   int count = 0;
+   while (count <= 100) {
+      count = count + 1;
+      putint (count);
+      putchar ('\n');
+   }
+}

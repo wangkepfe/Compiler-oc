@@ -1,0 +1,24 @@
+// $Id: 31-fib-2supn.oc,v 1.9 2018-04-06 13:18:35-07 - - $
+//
+// Very slow program, computes Fibonacci numbers with O(2^n) speed.
+//
+
+#include "oclib.oh"
+
+int fibonacci (int n) {
+   if (n < 2) return n;
+   return fibonacci (n - 1) + fibonacci (n - 2);
+}
+
+int main() {
+   int n = 0;
+   while (n < 10) {
+      putstr ("fibonacci(");
+      putint (n);
+      putstr (") = ");
+      putint (fibonacci (n));
+      putchar ('\n');
+      n = n + 1;
+   }
+}
+

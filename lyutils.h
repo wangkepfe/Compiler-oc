@@ -13,6 +13,7 @@ using namespace std;
 
 #include "astree.h"
 #include "auxlib.h"
+#include "string_set.h"
 
 #define YYEOF 0
 
@@ -21,6 +22,8 @@ extern char* yytext;
 extern int yy_flex_debug;
 extern int yydebug;
 extern size_t yyleng; 
+
+extern FILE *tokenFile;
 
 int yylex();
 int yylex_destroy();

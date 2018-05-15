@@ -1,0 +1,38 @@
+// $Id: 21-eratosthenes.oc,v 1.9 2018-04-06 13:17:54-07 - - $
+
+#include "oclib.oh"
+
+#define SIZE 100
+#define LOWPRIME 2
+string sieve[SIZE];
+
+int main() {
+   int index = LOWPRIME;
+
+   while (index < SIZE) {
+      sieve[index] = true;
+      index = index + 1;
+   }
+
+   int prime = LOWPRIME;
+   while (prime < SIZE) {
+      if (sieve[prime]) {
+         index = prime * 2;
+         while (index < SIZE) {
+            sieve[index] = false;
+            index = index + prime;
+         }
+      }
+      prime = prime + 1;
+   }
+
+   index = LOWPRIME;
+   while (index < SIZE) {
+      if (sieve[index]) {
+         putint (index);
+         putchar ('\n');
+      }
+      index = index + 1;
+   }
+}
+

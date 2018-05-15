@@ -1,0 +1,30 @@
+// $Id: 44-dot-product.oc,v 1.11 2018-04-06 13:19:36-07 - - $
+
+#include "oclib.oh"
+
+int dot_product (int size, int[] vec1, int[] vec2) {
+   int index = 0;
+   int dot = 0;
+   while (index < size) {
+      dot = dot + vec1[index] * vec2[index];
+      index = index + 1;
+   }
+   return dot;
+}
+
+#define SIZE 10
+
+int[] vec[SIZE];
+int[] vec[SIZE];
+
+int main() {
+   int i = 0;
+   while (i < SIZE) {
+      vec1[i] = i + 10;
+      vec2[i] = i * 10;
+      i = i + 1;
+   }
+   putint (dot_product (SIZE, vec1, vec2));
+   putchar ('\n');
+}
+

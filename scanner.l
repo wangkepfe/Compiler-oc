@@ -5,10 +5,25 @@
 #define YY_USER_ACTION  { lexer::advance(); }
 
 int yylval_token (int symbol) {
-    if(yylval != nullptr) delete yylval;
+
+    // astree node
     yylval = new astree (symbol, lexer::lloc, yytext);
+
+    // str file
+    string_set::intern(yytext);
+
+    // tok file
+    fprintf(tokenFile
+        , "%4ld  %6d.%-3d  %5d  %-15s  (%s)\n"
+        , lexer::lloc.filenr
+        , lexer::lloc.linenr
+        , lexer::lloc.offset
+        , symbol
+        , parser::get_tname(symbol)
+        , yytext);
+
     return symbol;
-}
+    }
 
 %}
 
@@ -29,12 +44,12 @@ INT             ([1-9]{DIGIT}*)
 OCT             (0[0-7]*)
 HEX             ((0x|0X)({DIGIT}|[A-Fa-f])+)
 
-CHAR            (’([^\\’\n]|\\[\\’"0nt])’)
-STRING          (\"([^\\"\n]|\\[\\’"0nt])*\")
+CHAR            ('([^\\'\n]|\\[\\'"0nt])')
+STRING          (\"([^\\"\n]|\\[\\'"0nt])*\")
 
 BADINDENT       ({DIGIT}({LETTER}|{DIGIT})*)
-BADCHAR         ((’([^\\’\n]|\\[\\’"0nt]))|(’([^’\n])’))
-BADSTRING       ((\"([^\\"\n]|\\[\\’"0nt])*)|(\"([^"\n])*\"))
+BADCHAR         (('([^\\'\n]|\\[\\'"0nt]))|('([^'\n])'))
+BADSTRING       ((\"([^\\"\n]|\\[\\'"0nt])*)|(\"([^"\n])*\"))
 
 %%
 
@@ -43,20 +58,16 @@ BADSTRING       ((\"([^\\"\n]|\\[\\’"0nt])*)|(\"([^"\n])*\"))
 [ \t]+          { }
 \n              { lexer::newline(); }
 
-"#"[ \t]+{INT}[ \t]+{STRING} { return yylval_token (TOK_OUT_DIREC);  }
-
 "#".*           { lexer::include(); }
 
-{IDENT}         { return yylval_token (TOK_IDENT); }
+{INT}           { return yylval_token (TOK_INTCON); }
+{OCT}           { return yylval_token (TOK_INTCON); }
+{HEX}           { return yylval_token (TOK_INTCON); }
 
-{INT}           { return yylval_token (TOK_INT); }
-{OCT}           { return yylval_token (TOK_OCT); }
-{HEX}           { return yylval_token (TOK_HEX); }
+{CHAR}          { return yylval_token (TOK_CHARCON); }
+{STRING}        { return yylval_token (TOK_STRINGCON); }
 
-{CHAR}          { return yylval_token (TOK_CHAR); }
-{STRING}        { return yylval_token (TOK_STRING); }
-
-"[]"            { return yylval_token (TOK_BRACKETS); }
+"[]"            { return yylval_token (TOK_ARRAY); }
 
 "+"             { return yylval_token ('+'); }
 "-"             { return yylval_token ('-'); }
@@ -91,9 +102,11 @@ BADSTRING       ((\"([^\\"\n]|\\[\\’"0nt])*)|(\"([^"\n])*\"))
 "null"          { return yylval_token (TOK_NULL); }
 "not"           { return yylval_token (TOK_NOT); }
 
+{IDENT}         { return yylval_token (TOK_IDENT); }
+
 {BADINDENT}     { lexer::badtoken (yytext); }
-{BADCHAR}       { lexer::badtoken (yytext); }
 {BADSTRING}     { lexer::badtoken (yytext); }
+{BADCHAR}       { lexer::badchar (*yytext); }
 .               { lexer::badchar (*yytext); }
 
 %%

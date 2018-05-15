@@ -1,0 +1,12 @@
+/*
+This is an unterminated comment.
+It would cause cpp to error out.
+When cpp returns a non-zero exit code,
+so should your compiler.
+$Id: 92-uncomment.oc,v 1.3 2018-03-30 10:19:09-07 - - $
+
+int main (int argc, char **argv) {
+
+   Your compiler never sees any of this code.
+
+}

@@ -1,0 +1,19 @@
+// $Id: 06-test6.oc,v 1.8 2018-04-06 13:13:58-07 - - $
+
+#include "oclib.oh"
+
+struct foo {}
+struct bar {}
+
+int f0();
+int f1 (int a);
+int f2 (int a, int b);
+int f3 (string a, string b, string c);
+int f4 (foo a, bar b);
+
+int main() {
+   string s = "a";
+   string[] sa = new string[10];
+   return 0;
+}
+

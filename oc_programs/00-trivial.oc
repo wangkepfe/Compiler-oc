@@ -1,0 +1,4 @@
+// $Id: 00-trivial.oc,v 1.4 2018-03-30 10:19:09-07 - - $
+//
+// This program does nothing but does not produce error messages.
+//

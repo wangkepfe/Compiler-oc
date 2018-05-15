@@ -1,0 +1,14 @@
+// $Id: 13-assertfail.oc,v 1.9 2018-04-06 13:15:45-07 - - $
+
+#undef __OCLIB_OH__
+#include "oclib.oh"
+
+int main (int argc, string[] argv) {
+   putstr (argv[0]);
+   putstr (" was compiled on ");
+   putstr (__DATE__);
+   putstr (" @ ");
+   putstr (__TIME__);
+   putstr ("\n");
+}
+

@@ -1,0 +1,23 @@
+// $Id: 45-towers-of-hanoi.oc,v 1.8 2018-04-06 13:19:47-07 - - $
+
+#include "oclib.oh"
+
+void move (string src, string dst) {
+   putstr ("Move a disk from ");
+   putstr (src);
+   putstr (" to ");
+   putstr (dst);
+   putstr (".\n");
+}
+
+void towers (int ndisks, string src, string tmp, string dst) {
+   if (ndisks < 1) return;
+   towers (ndisks - 1, src, dst, tmp);
+   move (src, dst);
+   towers (ndisks - 1, tmp, src, dst);
+}
+
+int main() {
+   towers (4, "Source", "Temporary", "Destination");
+}
+

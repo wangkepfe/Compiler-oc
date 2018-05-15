@@ -1,0 +1,44 @@
+// $Id: 42-viiiqueens.oc,v 1.11 2018-04-06 13:19:15-07 - - $
+
+#include "oclib.oh"
+
+#define BOARD_SIZE 8
+int[] board[BOARD_SIZE];
+
+bool is_safe (int newcol) {
+   int col = 0;
+   while (col < newcol) {
+      if (board[col] == board[newcol]) return false;
+      int diagonal = board[col] - board[newcol];
+      if (diagonal == col - newcol) return false;
+      if (diagonal == newcol - col) return false;
+      col = col + 1;
+   }
+   return true;
+}
+
+void printqueens() {
+   int col = 0;
+   while (col < BOARD_SIZE) {
+      putchar (board[col] + '1');
+      col = col + 1;
+   }
+   putchar ('\n');
+}
+
+void queens (int newcol) {
+   if (newcol == BOARD_SIZE) printqueens();
+   else {
+      int row = 0;
+      while (row < BOARD_SIZE) {
+         board[newcol] = row;
+         if (is_safe (newcol)) queens (newcol + 1);
+         row = row + 1;
+      }
+   }
+}
+
+int main() {
+   queens (0);
+}
+

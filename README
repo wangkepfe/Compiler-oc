@@ -1,8 +1,3 @@
-CMPS104a Assignment 2 - Token Scanner
+CMPS104a Assignment 3
 Name: Ke Wang
 Username: kwang82
-
-run make to build
-run make tests to test oc executable with valgrind
-
-generate .str and .tok

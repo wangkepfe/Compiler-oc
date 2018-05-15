@@ -24,29 +24,10 @@ using namespace std;
 const string CPP = "/usr/bin/cpp -nostdinc";
 string cpp_command;
 
+FILE *tokenFile;
+
 string Dstring{};
 string program{};
-
-void scanTokens(){
-    FILE* tokenFile = fopen((program + ".tok").c_str(), "w");
-
-    for (;;) {
-      int token = yylex();
-      DEBUGF('m', "token = %d", token);
-      if (yy_flex_debug) fflush (NULL);
-      if (token == YYEOF) break;
-
-      string_set::intern(yytext);
-      yylval->dump_node(tokenFile);
-    }
-
-    fclose(tokenFile);
-
-    // dump string sets
-    FILE* stringSetFile = fopen((program + ".str").c_str(), "w");
-    string_set::dump(stringSetFile);
-    fclose(stringSetFile);
-}
 
 void cpp_popen (const char* filename) {
    cpp_command = CPP + " " + Dstring + " " + filename;
@@ -61,7 +42,6 @@ void cpp_popen (const char* filename) {
       }
 
       lexer::newfilename (cpp_command);
-      scanTokens();
    }
 }
 
@@ -91,7 +71,8 @@ void scan_opts (int argc, char** argv) {
       }
    }
    if (optind > argc) {
-      errprintf ("Usage: %s [-ly] [filename]\n", exec::execname.c_str());
+      errprintf ("Usage: %s [-ly] [filename]\n"
+      , exec::execname.c_str());
       exit (exec::exit_status);
    }
 
@@ -107,7 +88,31 @@ int main(int argc, char** argv)
 {
     exec::execname = basename (argv[0]);
     scan_opts (argc, argv);
+
+    // tok file
+    tokenFile = fopen((program + ".tok").c_str(), "w");
+    int parse_rc = yyparse();
     cpp_pclose();
+    fclose(tokenFile); 
+
     yylex_destroy();
+
+    if (parse_rc)
+        errprintf ("parse failed (%d)\n", parse_rc);
+    else
+    {
+        // str file
+        FILE* stringSetFile = fopen((program + ".str").c_str(), "w");
+        string_set::dump(stringSetFile);
+        fclose(stringSetFile);
+
+        // ast file
+        FILE* astreeFile = fopen((program + ".ast").c_str(), "w");
+        parser::root->dump_tree(astreeFile);
+        fclose(astreeFile);
+        
+        delete parser::root;
+    }
+
     return exec::exit_status;
 }

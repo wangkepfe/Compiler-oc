@@ -42,21 +42,31 @@ astree* astree::adopt_sym (astree* child, int symbol_) {
    return adopt (child);
 }
 
+void astree::sym (int symbol_) {
+   symbol = symbol_;
+}
 
 void astree::dump_node (FILE* outfile) {
-   fprintf (outfile, "%p->{%s %zd.%zd.%zd \"%s\":\n",
-            this, parser::get_tname (symbol),
-            lloc.filenr, lloc.linenr, lloc.offset,
-            lexinfo->c_str());
-   for (size_t child = 0; child < children.size(); ++child) {
-      fprintf (outfile, " %p", children.at(child));
-   }
+    const char *tname = parser::get_tname (symbol);
+    if (strstr (tname, "TOK_") == tname) tname += 4;
+
+   fprintf (outfile, "%s \"%s\" %zd.%zd.%zd\n",
+            tname,
+            lexinfo->c_str(),
+            lloc.filenr, 
+            lloc.linenr, 
+            lloc.offset);
+
+   //for (size_t child = 0; child < children.size(); ++child) {
+   //   fprintf (outfile, " %p", children.at(child));
+   //}
 }
 
 void astree::dump_tree (FILE* outfile, int depth) {
-   fprintf (outfile, "%*s", depth * 3, "");
+    for(int i = 0; i < depth; i++)
+        fprintf (outfile, "|   ");
+   
    dump_node (outfile);
-   fprintf (outfile, "\n");
    for (astree* child: children) child->dump_tree (outfile, depth + 1);
    fflush (nullptr);
 }

@@ -1,0 +1,12 @@
+// $Id: 12-elseif.oc,v 1.8 2018-04-06 13:15:09-07 - - $
+
+#include "oclib.oh"
+
+int main (int argc) {
+   if (argc == 1) puts ("one");
+   else if (argc == 2) putstr ("two");
+   else if (argc == 3) putstr ("three");
+   else putstr ("many");
+   putchar ('\n');
+}
+
