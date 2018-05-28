@@ -59,7 +59,8 @@ void lexer::include() {
    size_t linenr;
    static char filename[0x1000];
    assert (sizeof filename > strlen (yytext));
-   int scan_rc = sscanf (yytext, "# %zd \"%[^\"]\"", &linenr, filename);
+   int scan_rc = sscanf (yytext
+        , "# %zd \"%[^\"]\"", &linenr, filename);
    if (scan_rc != 2) {
       errprintf ("%s: invalid directive, ignored\n", yytext);
    }else {

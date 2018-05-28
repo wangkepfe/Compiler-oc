@@ -80,7 +80,8 @@ void __stubprintf (const char* file, int line, const char* func,
                    const char* format, ...) {
    va_list args;
    fflush (nullptr);
-   printf ("%s: %s[%d] %s: ", exec::execname.c_str(), file, line, func);
+   printf ("%s: %s[%d] %s: "
+        , exec::execname.c_str(), file, line, func);
    va_start (args, format);
    vprintf (format, args);
    va_end (args);

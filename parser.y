@@ -169,7 +169,8 @@ arguments: '(' identdecl
 
 identdecl: basetype TOK_ARRAY TOK_IDENT 
                         { 
-                                $$ = $2->adopt($1, $3->sym(TOK_DECLID));
+                                $$ = $2->adopt($1
+                                , $3->sym(TOK_DECLID));
                         }
         | basetype TOK_IDENT  
                         { 
