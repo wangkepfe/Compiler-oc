@@ -97,6 +97,14 @@ void setField(astree* node, symbol_table* field_table)
     }
 }
 
+void setParams(astree* node, vector<symbol*>* params)
+{
+    if(node != nullptr)
+    {
+        node->symbl.parameters = params;
+    }
+}
+
 attr typeCheck(astree* node)
 {
     switch(node->tokenCode)
@@ -124,18 +132,18 @@ attr typeCheck(astree* node)
         
         case TOK_STRUCT: 
         {
+            // print struct title
             setAttr(node->children[0], attr::STRUCT); 
-            setField(node->children[0], new symbol_table(local_symbol_table));
-            local_symbol_table.clear();
-
-            struct_name = *(node->children[0]->lexinfo);
-
+            setField(node->children[0]
+                , new symbol_table(local_symbol_table));
+            
             global_symbol_table.insert(symbol_entry(
                 node->children[0]->lexinfo
                 , &(node->children[0]->symbl)));
 
             print_symbol (node->children[0], "\n");
 
+            // print field
             for (auto child : node->children[1]->children)
             {
                 if(child->tokenCode == TOK_ARRAY)
@@ -161,6 +169,10 @@ attr typeCheck(astree* node)
                     print_symbol (child->children[0]);
                 }
             }
+
+            // leave struct
+            local_symbol_table.clear();
+
             return attr::STRUCT;
         }
 
@@ -185,13 +197,12 @@ attr typeCheck(astree* node)
 
             // function attr
             setAttr(node->children[0]->children[0], attr::FUNCTION);
+            setParams(node->children[0]->children[0]
+            , new vector<symbol*>(local_parameters));
 
             global_symbol_table.insert(symbol_entry(
                 node->children[0]->children[0]->lexinfo
                 , &(node->children[0]->children[0]->symbl)));
-
-            local_symbol_table.clear();
-            local_parameters.clear();
 
             // print
             print_symbol(node->children[0]->children[0], "\n");
@@ -226,18 +237,24 @@ attr typeCheck(astree* node)
 
             for (auto child : node->children[2]->children)
             {
-                child->children[0]->children[0]->lloc.blocknr = next_block;
+                child->children[0]->
+                    children[0]->lloc.blocknr = next_block;
 
                 if(child->tokenCode == TOK_VARDECL)
                 {
                     if(child->children[0]->tokenCode == TOK_TYPEID)
                     {
-                        if(global_symbol_table.find(child->children[0]->lexinfo)
+                        if(global_symbol_table
+                        .find(child->children[0]->lexinfo)
                             != global_symbol_table.end())
                         {
-                            setAttr(child->children[0]->children[0], attr::STRUCT);
-                            struct_name = *(child->children[0]->lexinfo);
-                            print_symbol (child->children[0]->children[0]);
+                            setAttr(child->
+                                children[0]->children[0]
+                                    , attr::STRUCT);
+                            struct_name = 
+                                *(child->children[0]->lexinfo);
+                            print_symbol 
+                                (child->children[0]->children[0]);
                         }
                         else
                         {
@@ -254,6 +271,7 @@ attr typeCheck(astree* node)
             /********* leave function *********/
 
             local_symbol_table.clear();
+            local_parameters.clear();
             next_block++;
 
             return attr::FUNCTION;
@@ -268,7 +286,8 @@ attr typeCheck(astree* node)
                 setAttr(child->children[0], attr::LVAL);
                 setAttr(child->children[0], attr::PARAM, sqs++);
 
-                local_parameters.push_back(&(child->children[0]->symbl));
+                local_parameters.push_back(
+                    &(child->children[0]->symbl));
             }
             return attr::PARAM;
         } 
@@ -280,7 +299,8 @@ attr typeCheck(astree* node)
             {
                 if(child->tokenCode == TOK_VARDECL)
                 {
-                    setAttr(child->children[0]->children[0], attr::LOCAL, sqs++);
+                    setAttr(child->
+                        children[0]->children[0], attr::LOCAL, sqs++);
                 }
             }
             return attr::VOID;

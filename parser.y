@@ -82,7 +82,8 @@ structdef: TOK_STRUCT TOK_IDENT '{' '}'
         | TOK_STRUCT TOK_IDENT fieldrecur '}'
                         {
                                 destroy ($4);
-                                $$ = $1->adopt($2->sym(TOK_TYPEID), $3->sym(TOK_FIELD));
+                                $$ = $1->adopt($2->sym(TOK_TYPEID)
+                                        , $3->sym(TOK_FIELD));
                         }
         ;
 
@@ -126,26 +127,30 @@ function: identdecl '(' ')' fnbody
                         {       
                                 destroy ($3);
                                 $2->sym(TOK_PARAM);
-                                $$ = new astree(TOK_FUNCTION, $1->lloc, "");
+                                $$ = new astree(TOK_FUNCTION
+                                        , $1->lloc, "");
                                 $$ = $$->adopt ($1, $2, $4); 
                         }
         | identdecl arguments ')' fnbody
                         {       
                                 destroy ($3);
-                                $$ = new astree(TOK_FUNCTION, $1->lloc, "");
+                                $$ = new astree(TOK_FUNCTION
+                                        , $1->lloc, "");
                                 $$ = $$->adopt ($1, $2, $4); 
                         }
         | identdecl '(' ')' ';'
                         {       
                                 destroy ($3, $4);
                                 $2->sym(TOK_PARAM);
-                                $$ = new astree(TOK_PROTO, $1->lloc, "");
+                                $$ = new astree(TOK_PROTO
+                                        , $1->lloc, "");
                                 $$ = $$->adopt ($1, $2); 
                         }
         | identdecl arguments ')' ';'
                         {       
                                 destroy ($3, $4);
-                                $$ = new astree(TOK_PROTO, $1->lloc, "");
+                                $$ = new astree(TOK_PROTO
+                                        , $1->lloc, "");
                                 $$ = $$->adopt ($1, $2);
                         }
         ;
