@@ -1,0 +1,10 @@
+struct node{
+    int foo;
+    node link;
+}
+
+node func(node head, int length){
+    int a = 0;
+    string b = "";
+    node c = new node;
+}

@@ -12,7 +12,7 @@
 #include "lyutils.h"
 
 astree::astree (int symbol_, const location& lloc_, const char* info) {
-   symbol = symbol_;
+   tokenCode = symbol_;
    lloc = lloc_;
    lexinfo = string_set::intern (info);
    // vector defaults to empty -- no children
@@ -31,23 +31,20 @@ astree::~astree() {
    }
 }
 
-astree* astree::adopt (astree* child1, astree* child2) {
+astree* astree::adopt (astree* child1, astree* child2, astree* child3) {
    if (child1 != nullptr) children.push_back (child1);
    if (child2 != nullptr) children.push_back (child2);
+   if (child3 != nullptr) children.push_back (child3);
    return this;
 }
 
-astree* astree::adopt_sym (astree* child, int symbol_) {
-   symbol = symbol_;
-   return adopt (child);
-}
-
-void astree::sym (int symbol_) {
-   symbol = symbol_;
+astree* astree::sym (int symbol_) {
+   tokenCode = symbol_;
+   return this;
 }
 
 void astree::dump_node (FILE* outfile) {
-    const char *tname = parser::get_tname (symbol);
+    const char *tname = parser::get_tname (tokenCode);
     if (strstr (tname, "TOK_") == tname) tname += 4;
 
    fprintf (outfile, "%s \"%s\" %zd.%zd.%zd\n",
@@ -79,16 +76,17 @@ void astree::dump (FILE* outfile, astree* tree) {
 void astree::print (FILE* outfile, astree* tree, int depth) {
    fprintf (outfile, "; %*s", depth * 3, "");
    fprintf (outfile, "%s \"%s\" (%zd.%zd.%zd)\n",
-            parser::get_tname (tree->symbol), tree->lexinfo->c_str(),
+            parser::get_tname (tree->tokenCode), tree->lexinfo->c_str(),
             tree->lloc.filenr, tree->lloc.linenr, tree->lloc.offset);
    for (astree* child: tree->children) {
       astree::print (outfile, child, depth + 1);
    }
 }
 
-void destroy (astree* tree1, astree* tree2) {
+void destroy (astree* tree1, astree* tree2, astree* tree3) {
    if (tree1 != nullptr) delete tree1;
    if (tree2 != nullptr) delete tree2;
+   if (tree3 != nullptr) delete tree3;
 }
 
 void errllocprintf (const location& lloc, const char* format,

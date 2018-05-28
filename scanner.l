@@ -4,13 +4,10 @@
 
 #define YY_USER_ACTION  { lexer::advance(); }
 
-int yylval_token (int symbol) {
+int yylval_token (int _symbol) {
 
     // astree node
-    yylval = new astree (symbol, lexer::lloc, yytext);
-
-    // str file
-    string_set::intern(yytext);
+    yylval = new astree (_symbol, lexer::lloc, yytext);
 
     // tok file
     fprintf(tokenFile
@@ -18,11 +15,11 @@ int yylval_token (int symbol) {
         , lexer::lloc.filenr
         , lexer::lloc.linenr
         , lexer::lloc.offset
-        , symbol
-        , parser::get_tname(symbol)
+        , _symbol
+        , parser::get_tname(_symbol)
         , yytext);
 
-    return symbol;
+    return _symbol;
     }
 
 %}

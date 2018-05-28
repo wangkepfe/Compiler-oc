@@ -25,6 +25,7 @@ const string CPP = "/usr/bin/cpp -nostdinc";
 string cpp_command;
 
 FILE *tokenFile;
+FILE* symfile;
 
 string Dstring{};
 string program{};
@@ -110,6 +111,11 @@ int main(int argc, char** argv)
         FILE* astreeFile = fopen((program + ".ast").c_str(), "w");
         parser::root->dump_tree(astreeFile);
         fclose(astreeFile);
+
+        // sym file
+        symfile = fopen((program + ".sym").c_str(), "w");
+        type_check(parser::root);
+        fclose(symfile);
         
         delete parser::root;
     }
