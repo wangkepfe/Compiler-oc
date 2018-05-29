@@ -22,6 +22,12 @@ std::bitset<static_cast<size_t>(attr::BITSET_SIZE)>;
 // nodes in all of the symbol tables identical, and null out
 // unnecessary fields.
 struct symbol {
+    symbol()
+    :attributes()
+    ,sequence{0}
+    ,fields{nullptr}
+    ,parameters{nullptr}
+    {}
     ~symbol(){
         if(fields != nullptr) delete fields;
         if(parameters != nullptr) delete parameters;

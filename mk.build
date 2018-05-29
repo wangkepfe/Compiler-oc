@@ -1,0 +1,13 @@
+#!/bin/bash -x
+# $Id: mk.build,v 1.2 2016-10-20 16:12:12-07 - - $
+#
+# This does the build and runs checksource.
+#
+PATH=$PATH:/afs/cats.ucsc.edu/courses/cmps012b-wm/bin
+if [ -f PARTNER ] ; then partnercheck 2>&1 | tee partnercheck.log ; fi
+Files=$(ls *.[hly] *.c* Makefile README \
+      | grep -v yylex.cpp \
+      | grep -v yyparse.h \
+      | grep -v yyparse.cpp)
+checksource $Files 2>&1 | tee checksource.log
+gmake 2>&1 | tee gmake.log

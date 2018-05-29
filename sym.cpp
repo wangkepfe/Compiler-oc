@@ -84,7 +84,7 @@ void setAttr(astree* node, attr att, size_t sqs = 0)
     if(node != nullptr)
     {
         node->symbl.attributes.set(static_cast<size_t>(att));
-        if(sqs)
+        if(sqs != 0)
             node->symbl.sequence = sqs;
     }
 }
@@ -146,8 +146,8 @@ attr typeCheck(astree* node)
         {
             // print struct title
             setAttr(node->children[0], attr::STRUCT); 
-            //setField(node->children[0]
-            //    , new symbol_table(local_symbol_table));
+            setField(node->children[0]
+                , new symbol_table(local_symbol_table));
             
             global_symbol_table.insert(symbol_entry(
                 node->children[0]->lexinfo
@@ -162,7 +162,7 @@ attr typeCheck(astree* node)
                     continue;
 
                 if(child->tokenCode == TOK_ARRAY
-                    ||child->children.size() == 2)
+                    &&child->children.size() == 2)
                 {
                     if(global_symbol_table.find(child
                         ->children[0]->lexinfo)
@@ -179,7 +179,7 @@ attr typeCheck(astree* node)
                     }
                 }
                 else if(child->tokenCode == TOK_TYPEID
-                    ||!child->children.empty())
+                    &&!child->children.empty())
                 {
                     if(global_symbol_table.find(child->lexinfo)
                         != global_symbol_table.end())
@@ -217,7 +217,7 @@ attr typeCheck(astree* node)
                 if(!child->children.empty())
                 {
                     if(child->tokenCode == TOK_ARRAY
-                    ||child->children.size() == 2)
+                    && child->children.size() == 2)
                     {
                         setAttr(child->children[1]
                         , attr::FIELD, sqs++);
@@ -244,14 +244,14 @@ attr typeCheck(astree* node)
         case TOK_FUNCTION: 
         {
             if(node->children.size() != 3
-            ||node->children[0]->children.empty())
+            || node->children[0]->children.empty())
                 break;
 
             /********* function title *********/
 
             // function attr
             if(node->children[0]->tokenCode == TOK_ARRAY
-                ||node->children[0]->children.size() == 2)
+                && node->children[0]->children.size() == 2)
             {
                 if(global_symbol_table.find(node
                         ->children[0]
@@ -265,6 +265,8 @@ attr typeCheck(astree* node)
                         ->children[0]->lexinfo);
                     setAttr(node->children[0]
                     ->children[1], attr::FUNCTION);
+                    setParams(node->children[0]->children[1]
+                    , new vector<symbol*>(local_parameters));
 
                     global_symbol_table.insert(symbol_entry(
                     node->children[0]
@@ -291,6 +293,8 @@ attr typeCheck(astree* node)
                     struct_name = *(node
                         ->children[0]->lexinfo);
                     setAttr(node->children[0]->children[0], attr::FUNCTION);
+                    setParams(node->children[0]->children[0]
+                , new vector<symbol*>(local_parameters));
 
                     global_symbol_table.insert(symbol_entry(
                     node->children[0]->children[0]->lexinfo
@@ -307,8 +311,8 @@ attr typeCheck(astree* node)
             else
             {
                 setAttr(node->children[0]->children[0], attr::FUNCTION);
-                //setParams(node->children[0]->children[0]
-                //, new vector<symbol*>(local_parameters));
+                setParams(node->children[0]->children[0]
+                , new vector<symbol*>(local_parameters));
 
                 global_symbol_table.insert(symbol_entry(
                 node->children[0]->children[0]->lexinfo
@@ -328,7 +332,7 @@ attr typeCheck(astree* node)
                 child->children[0]->lloc.blocknr = next_block;
 
                 if(child->tokenCode == TOK_ARRAY
-                    ||child->children.size() == 2)
+                    && child->children.size() == 2)
                 {
                     if(global_symbol_table.find(child
                         ->children[0]->lexinfo)
@@ -375,7 +379,7 @@ attr typeCheck(astree* node)
                 if(child->tokenCode == TOK_VARDECL)
                 {
                     if(child->children[0]->tokenCode == TOK_ARRAY
-                    ||child->children[0]->children.size() == 2)
+                    && child->children[0]->children.size() == 2)
                     {
                         child->children[0]->
                         children[1]->lloc.blocknr = next_block;
@@ -399,7 +403,8 @@ attr typeCheck(astree* node)
                             // used undeclared type
                         }
                     }
-                    else if(child->children[0]->tokenCode == TOK_TYPEID)
+                    else if(child->children[0]
+                    ->tokenCode == TOK_TYPEID)
                     {
                         child->children[0]->
                         children[0]->lloc.blocknr = next_block;
@@ -422,7 +427,11 @@ attr typeCheck(astree* node)
                     }
                     else
                     {
-                        print_symbol (child->children[0]->children[0]);
+                        child->children[0]->
+                        children[0]->lloc.blocknr = next_block;
+
+                        print_symbol (child
+                        ->children[0]->children[0]);
                     }
                 }  
             }
@@ -445,7 +454,7 @@ attr typeCheck(astree* node)
                     continue;
 
                 if(child->tokenCode == TOK_ARRAY
-                    ||child->children.size() == 2)
+                    && child->children.size() == 2)
                 {
                     setAttr(child->children[1], attr::VARIABLE);
                     setAttr(child->children[1], attr::LVAL);
@@ -479,7 +488,7 @@ attr typeCheck(astree* node)
                 if(child->tokenCode == TOK_VARDECL)
                 {
                     if(child->children[0]->tokenCode == TOK_ARRAY
-                    ||child->children.size() == 2)
+                    && child->children.size() == 2)
                     {
                         setAttr(child->
                         children[0]->children[1]
@@ -502,7 +511,7 @@ attr typeCheck(astree* node)
                 break;
 
             if(node->children[0]->tokenCode == TOK_ARRAY
-                    ||node->children[0]
+                    && node->children[0]
                     ->children.size() == 2)
             {
                 setAttr(node->children[0]->children[1], attr::VARIABLE);

@@ -1,8 +1,0 @@
-// nothing
-
-#include "oclib.h"
-
-int main()
-{
-    call(1, b, c, "123");
-}

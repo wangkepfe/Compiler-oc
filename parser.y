@@ -330,9 +330,10 @@ variable: TOK_IDENT             { $$ = $1; }
                                 destroy ($4);
                                 $$ = $2->adopt($1, $3);
                         }
-        | expr '.' TOK_FIELD    
+        | expr '.' TOK_IDENT    
                         {
-                                $$ = $2->adopt($1, $3);
+                                $$ = $2->adopt($1
+                                , $3->sym(TOK_FIELD));
                         }
         ;
 
