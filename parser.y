@@ -305,15 +305,18 @@ call: TOK_IDENT '(' ')'
                                 $2->sym(TOK_CALL);
                                 $$ = $2->adopt($1);
                         }
-        | TOK_IDENT '(' callargs ')'
+        | callargs ')'
                         { 
-                                destroy ($4);
-                                $2->sym(TOK_CALL);
-                                $$ = $2->adopt ($1, $3); 
+                                destroy ($2);
+                                $$ = $1;
                         }
         ;
 
-callargs: expr          { $$ = $1; }                 
+callargs: TOK_IDENT '(' expr      
+                        { 
+                                $2->sym(TOK_CALL);
+                                $$ = $2->adopt($1, $3); 
+                        }                 
         | callargs ',' expr
                         { 
                                 destroy ($2);

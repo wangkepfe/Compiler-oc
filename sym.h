@@ -23,8 +23,8 @@ std::bitset<static_cast<size_t>(attr::BITSET_SIZE)>;
 // unnecessary fields.
 struct symbol {
     ~symbol(){
-        if(fields) delete fields;
-        if(parameters) delete parameters;
+        if(fields != nullptr) delete fields;
+        if(parameters != nullptr) delete parameters;
     }
 
     // Symbol attributes, as described earlier.

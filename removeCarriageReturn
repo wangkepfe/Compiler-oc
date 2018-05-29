@@ -1,0 +1,11 @@
+#!/bin/bash -x
+Files=$(ls *.[hly] *.c* Makefile README \
+      | grep -v yylex.cpp \
+      | grep -v yyparse.h \
+      | grep -v yyparse.cpp)
+tmp='.temp'
+for file in $Files
+do
+	sed 's/\r$//' $file | tee $file$tmp 
+	mv $file$tmp $file
+done

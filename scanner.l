@@ -87,6 +87,9 @@ BADSTRING       ((\"([^\\"\n]|\\[\\'"0nt])*)|(\"([^"\n])*\"))
 "<="            { return yylval_token (TOK_LE); }
 ">="            { return yylval_token (TOK_GE); }
 
+"<"             { return yylval_token (TOK_LT); }
+">"             { return yylval_token (TOK_GT); }
+
 "if"            { return yylval_token (TOK_IF); }
 "else"          { return yylval_token (TOK_ELSE); }
 "while"         { return yylval_token (TOK_WHILE); }

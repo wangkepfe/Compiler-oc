@@ -107,35 +107,47 @@ void setParams(astree* node, vector<symbol*>* params)
 
 attr typeCheck(astree* node)
 {
+    if(node == nullptr)
+        return attr::VOID;
+
     switch(node->tokenCode)
     {
         case TOK_VOID: 
-            setAttr(node->children[0], attr::VOID); 
+            if(!node->children.empty())
+                setAttr(node->children[0], attr::VOID); 
             return attr::VOID;
 
         case TOK_INT: 
-            setAttr(node->children[0], attr::INT); 
+            if(!node->children.empty())
+                setAttr(node->children[0], attr::INT); 
             return attr::INT;
 
         case TOK_NULL: 
-            setAttr(node->children[0], attr::NULLX); 
+            if(!node->children.empty())
+                setAttr(node->children[0], attr::NULLX); 
             return attr::NULLX;
         case TOK_STRING: 
-            setAttr(node->children[0], attr::STRING); 
+            if(!node->children.empty())
+                setAttr(node->children[0], attr::STRING); 
             return attr::STRING;
         case TOK_ARRAY: 
         {
-            setAttr(node->children[1], attr::ARRAY);
-            setAttr(node->children[1], typeCheck(node->children[0]));
+            if(node->children.size() == 2)
+            {
+                setAttr(node->children[1], attr::ARRAY);
+                setAttr(node->children[1], typeCheck(node->children[0]));
+            }
             return attr::ARRAY;
         } 
         
         case TOK_STRUCT: 
         {
+        if(node->children.size() == 2)
+        {
             // print struct title
             setAttr(node->children[0], attr::STRUCT); 
-            setField(node->children[0]
-                , new symbol_table(local_symbol_table));
+            //setField(node->children[0]
+            //    , new symbol_table(local_symbol_table));
             
             global_symbol_table.insert(symbol_entry(
                 node->children[0]->lexinfo
@@ -146,11 +158,28 @@ attr typeCheck(astree* node)
             // print field
             for (auto child : node->children[1]->children)
             {
-                if(child->tokenCode == TOK_ARRAY)
+                if(!child)
+                    continue;
+
+                if(child->tokenCode == TOK_ARRAY
+                    ||child->children.size() == 2)
                 {
-                    print_symbol (child->children[1]);
+                    if(global_symbol_table.find(child
+                        ->children[0]->lexinfo)
+                        != global_symbol_table.end())
+                    {
+                        setAttr(child->children[1], attr::STRUCT);
+                        struct_name = *(child
+                            ->children[0]->lexinfo);
+                        print_symbol (child->children[1]);
+                    }
+                    else
+                    {
+                        // used undeclared type
+                    }
                 }
-                else if(child->tokenCode == TOK_TYPEID)
+                else if(child->tokenCode == TOK_TYPEID
+                    ||!child->children.empty())
                 {
                     if(global_symbol_table.find(child->lexinfo)
                         != global_symbol_table.end())
@@ -166,13 +195,14 @@ attr typeCheck(astree* node)
                 }
                 else
                 {
-                    print_symbol (child->children[0]);
+                    if(!child->children.empty())
+                        print_symbol (child->children[0]);
                 }
             }
 
             // leave struct
             local_symbol_table.clear();
-
+        }
             return attr::STRUCT;
         }
 
@@ -181,11 +211,31 @@ attr typeCheck(astree* node)
             size_t sqs = 0;
             for(auto child : node->children)
             {
-                setAttr(child->children[0], attr::FIELD, sqs++);
+                if(!child)
+                    continue;
+                
+                if(!child->children.empty())
+                {
+                    if(child->tokenCode == TOK_ARRAY
+                    ||child->children.size() == 2)
+                    {
+                        setAttr(child->children[1]
+                        , attr::FIELD, sqs++);
 
-                local_symbol_table.insert(symbol_entry(
-                    child->children[0]->lexinfo
-                    , &(child->children[0]->symbl)));
+                        local_symbol_table.insert(symbol_entry(
+                        child->children[1]->lexinfo
+                        , &(child->children[1]->symbl)));
+                    }
+                    else
+                    {
+                        setAttr(child->children[0]
+                        , attr::FIELD, sqs++);
+
+                        local_symbol_table.insert(symbol_entry(
+                        child->children[0]->lexinfo
+                        , &(child->children[0]->symbl)));
+                    }  
+                }
             }
             return attr::FIELD;
         }
@@ -193,27 +243,108 @@ attr typeCheck(astree* node)
         // function
         case TOK_FUNCTION: 
         {
+            if(node->children.size() != 3
+            ||node->children[0]->children.empty())
+                break;
+
             /********* function title *********/
 
             // function attr
-            setAttr(node->children[0]->children[0], attr::FUNCTION);
-            setParams(node->children[0]->children[0]
-            , new vector<symbol*>(local_parameters));
+            if(node->children[0]->tokenCode == TOK_ARRAY
+                ||node->children[0]->children.size() == 2)
+            {
+                if(global_symbol_table.find(node
+                        ->children[0]
+                        ->children[0]->lexinfo)
+                        != global_symbol_table.end())
+                {
+                    setAttr(node->children[0]
+                        ->children[1], attr::STRUCT);
+                    struct_name = *(node
+                        ->children[0]
+                        ->children[0]->lexinfo);
+                    setAttr(node->children[0]
+                    ->children[1], attr::FUNCTION);
 
-            global_symbol_table.insert(symbol_entry(
+                    global_symbol_table.insert(symbol_entry(
+                    node->children[0]
+                    ->children[1]->lexinfo
+                    , &(node->children[0]
+                    ->children[1]->symbl)));
+
+                    print_symbol (node->children[0]
+                        ->children[1], "\n");
+                }
+                else
+                {
+                    // used undeclared type
+                }
+            }
+            else if(node->children[0]->tokenCode == TOK_TYPEID)
+            {
+                if(global_symbol_table.find(node
+                        ->children[0]->lexinfo)
+                        != global_symbol_table.end())
+                {
+                    setAttr(node->children[0]
+                        ->children[0], attr::STRUCT);
+                    struct_name = *(node
+                        ->children[0]->lexinfo);
+                    setAttr(node->children[0]->children[0], attr::FUNCTION);
+
+                    global_symbol_table.insert(symbol_entry(
+                    node->children[0]->children[0]->lexinfo
+                    , &(node->children[0]->children[0]->symbl)));
+
+                    print_symbol (node->children[0]
+                        ->children[0], "\n");
+                }
+                else
+                {
+                    // used undeclared type
+                }
+            }
+            else
+            {
+                setAttr(node->children[0]->children[0], attr::FUNCTION);
+                //setParams(node->children[0]->children[0]
+                //, new vector<symbol*>(local_parameters));
+
+                global_symbol_table.insert(symbol_entry(
                 node->children[0]->children[0]->lexinfo
                 , &(node->children[0]->children[0]->symbl)));
 
-            // print
-            print_symbol(node->children[0]->children[0], "\n");
+                // print
+                print_symbol(node->children[0]->children[0], "\n");
+            }
 
             /********* function params *********/
 
             for (auto child : node->children[1]->children)
             {
+                if(!child || child->children.empty())
+                    continue;
+
                 child->children[0]->lloc.blocknr = next_block;
 
-                if(child->tokenCode == TOK_TYPEID)
+                if(child->tokenCode == TOK_ARRAY
+                    ||child->children.size() == 2)
+                {
+                    if(global_symbol_table.find(child
+                        ->children[0]->lexinfo)
+                        != global_symbol_table.end())
+                    {
+                        setAttr(child->children[1], attr::STRUCT);
+                        struct_name = *(child
+                            ->children[0]->lexinfo);
+                        print_symbol (child->children[1]);
+                    }
+                    else
+                    {
+                        // used undeclared type
+                    }
+                }
+                else if(child->tokenCode == TOK_TYPEID)
                 {
                     if(global_symbol_table.find(child->lexinfo)
                         != global_symbol_table.end())
@@ -237,13 +368,41 @@ attr typeCheck(astree* node)
 
             for (auto child : node->children[2]->children)
             {
-                child->children[0]->
-                    children[0]->lloc.blocknr = next_block;
+                if(!child || child->children.empty()
+                    || child->children[0]->children.empty())
+                    continue;
 
                 if(child->tokenCode == TOK_VARDECL)
                 {
-                    if(child->children[0]->tokenCode == TOK_TYPEID)
+                    if(child->children[0]->tokenCode == TOK_ARRAY
+                    ||child->children[0]->children.size() == 2)
                     {
+                        child->children[0]->
+                        children[1]->lloc.blocknr = next_block;
+
+                        if(global_symbol_table
+                        .find(child->children[0]
+                        ->children[0]->lexinfo)
+                            != global_symbol_table.end())
+                        {
+                            setAttr(child->
+                                children[0]->children[1]
+                                    , attr::STRUCT);
+                            struct_name = 
+                                *(child->children[0]
+                                ->children[0]->lexinfo);
+                            print_symbol 
+                                (child->children[0]->children[1]);
+                        }
+                        else
+                        {
+                            // used undeclared type
+                        }
+                    }
+                    else if(child->children[0]->tokenCode == TOK_TYPEID)
+                    {
+                        child->children[0]->
+                        children[0]->lloc.blocknr = next_block;
                         if(global_symbol_table
                         .find(child->children[0]->lexinfo)
                             != global_symbol_table.end())
@@ -282,12 +441,28 @@ attr typeCheck(astree* node)
             size_t sqs = 0;
             for(auto child : node->children)
             {
-                setAttr(child->children[0], attr::VARIABLE);
-                setAttr(child->children[0], attr::LVAL);
-                setAttr(child->children[0], attr::PARAM, sqs++);
+                if(!child || child->children.empty())
+                    continue;
 
-                local_parameters.push_back(
+                if(child->tokenCode == TOK_ARRAY
+                    ||child->children.size() == 2)
+                {
+                    setAttr(child->children[1], attr::VARIABLE);
+                    setAttr(child->children[1], attr::LVAL);
+                    setAttr(child->children[1], attr::PARAM, sqs++);
+
+                    local_parameters.push_back(
+                    &(child->children[1]->symbl));
+                }
+                else
+                {
+                    setAttr(child->children[0], attr::VARIABLE);
+                    setAttr(child->children[0], attr::LVAL);
+                    setAttr(child->children[0], attr::PARAM, sqs++);
+
+                    local_parameters.push_back(
                     &(child->children[0]->symbl));
+                }
             }
             return attr::PARAM;
         } 
@@ -297,10 +472,24 @@ attr typeCheck(astree* node)
             size_t sqs = 0;
             for(auto child : node->children)
             {
+                if(!child || child->children.empty()
+                    || child->children[0]->children.empty())
+                        continue;
+
                 if(child->tokenCode == TOK_VARDECL)
                 {
-                    setAttr(child->
-                        children[0]->children[0], attr::LOCAL, sqs++);
+                    if(child->children[0]->tokenCode == TOK_ARRAY
+                    ||child->children.size() == 2)
+                    {
+                        setAttr(child->
+                        children[0]->children[1]
+                        , attr::LOCAL, sqs++);
+                    }
+                    else{
+                        setAttr(child->
+                        children[0]->children[0]
+                        , attr::LOCAL, sqs++);
+                    }
                 }
             }
             return attr::VOID;
@@ -308,12 +497,30 @@ attr typeCheck(astree* node)
 
         case TOK_VARDECL:
         {
-            setAttr(node->children[0]->children[0], attr::VARIABLE);
-            setAttr(node->children[0]->children[0], attr::LVAL);
+            if(node->children.empty()
+            || node->children[0]->children.empty())
+                break;
 
-            local_symbol_table.insert(symbol_entry(
-                node->children[0]->lexinfo
-                ,&(node->children[0]->symbl)));
+            if(node->children[0]->tokenCode == TOK_ARRAY
+                    ||node->children[0]
+                    ->children.size() == 2)
+            {
+                setAttr(node->children[0]->children[1], attr::VARIABLE);
+                setAttr(node->children[0]->children[1], attr::LVAL);
+
+                local_symbol_table.insert(symbol_entry(
+                node->children[0]->children[1]->lexinfo
+                ,&(node->children[0]->children[1]->symbl)));
+            }
+            else
+            {
+                setAttr(node->children[0]->children[0], attr::VARIABLE);
+                setAttr(node->children[0]->children[0], attr::LVAL);
+
+                local_symbol_table.insert(symbol_entry(
+                node->children[0]->children[0]->lexinfo
+                ,&(node->children[0]->children[0]->symbl)));
+            }
 
             return attr::VARIABLE;
         }

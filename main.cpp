@@ -31,7 +31,8 @@ string Dstring{};
 string program{};
 
 void cpp_popen (const char* filename) {
-   cpp_command = CPP + " " + Dstring + " " + filename;
+   cpp_command = CPP 
+    + " -D__OCLIB_H__ " + filename;
    yyin = popen (cpp_command.c_str(), "r");
    if (yyin == nullptr) {
       syserrprintf (cpp_command.c_str());
