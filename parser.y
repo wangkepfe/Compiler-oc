@@ -23,7 +23,7 @@
 
 %token TOK_ROOT
 
-%token TOK_VOID TOK_INT TOK_STRING
+%token TOK_VOID TOK_INT TOK_STRING TOK_CHAR
 %token TOK_OCT TOK_HEX
 
 %token TOK_INTCON TOK_CHARCON TOK_STRINGCON
@@ -40,7 +40,7 @@
 
 %token TOK_IDENT TOK_TYPEID TOK_DECLID TOK_VARDECL
 
-%token TOK_NEWARRAY TOK_NEWSTR
+%token TOK_NEWARRAY TOK_NEWSTR TOK_NEWARRAY2
  
 %token TOK_PROTO TOK_FUNCTION
 %token TOK_PARAM
@@ -54,7 +54,7 @@
 %left  '+' '-'
 %left  '*' '/' '%'
 %right TOK_POS TOK_NEG '!' TOK_NEW
-%left  TOK_ARRAY TOK_FIELD TOK_FUNCTION
+%left  TOK_ARRAY TOK_FIELD TOK_FUNCTION 
 %left  '[' '.'
 
 %nonassoc '('
@@ -112,6 +112,7 @@ fieldrecur: '{' fielddecl
 basetype: TOK_VOID              { $$ = $1; }
         | TOK_INT               { $$ = $1; }
         | TOK_STRING            { $$ = $1; }
+        | TOK_CHAR              { $$ = $1; }
         | TOK_IDENT             { $$ = $1->sym(TOK_TYPEID); }
         ;
 
@@ -228,15 +229,24 @@ statement: block                { $$ = $1; }
                         }
         ;
 
-block: '{' blockrecur '}'
+block: blockrecur '}'
                         {
-                                destroy ($3);
+                                destroy ($2);
+                                $$ = $1;
+                        }
+        | '{' '}'
+                        { 
+                                destroy ($2);
                                 $1->sym(TOK_BLOCK);
-                                $$ = $1->adopt ($2);
+                                $$ = $1;
                         }
         ;
 
-blockrecur: statement           { $$ = $1; }
+blockrecur: '{' statement           
+                        { 
+                                $1->sym(TOK_BLOCK);
+                                $$ = $1->adopt ($2);
+                        }
         | blockrecur statement  { $$ = $1->adopt ($2); }
         ;
 
@@ -296,6 +306,12 @@ allocation: TOK_NEW TOK_IDENT { $$ = $1->adopt($2->sym(TOK_TYPEID)); }
                                 destroy ($3, $5);
                                 $1->sym(TOK_NEWARRAY);
                                 $$ = $1->adopt ($2, $4);   
+                        }
+        | TOK_NEW basetype TOK_ARRAY '[' expr ']'
+                        {
+                                destroy ($3, $4, $6);
+                                $1->sym(TOK_NEWARRAY2);
+                                $$ = $1->adopt ($2, $5);   
                         }
         ;
 
@@ -359,7 +375,6 @@ binop:    TOK_EQ                { $$ = $1; }
 unop:     '+'                   { $$ = $1->sym(TOK_POS); }
         | '-'                   { $$ = $1->sym(TOK_NEG); }
         | '!'                   { $$ = $1->sym(TOK_NOT); }
-        | TOK_NOT               { $$ = $1; }
         ;
 
 %%

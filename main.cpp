@@ -18,6 +18,7 @@
 #include "astree.h"
 #include "auxlib.h"
 #include "string_set.h"
+#include "emit.h"
 
 using namespace std;
 
@@ -26,6 +27,7 @@ string cpp_command;
 
 FILE *tokenFile;
 FILE* symfile;
+FILE* oilfile;
 
 string Dstring{};
 string program{};
@@ -119,6 +121,11 @@ int main(int argc, char** argv)
         symfile = fopen((program + ".sym").c_str(), "w");
         type_check(parser::root);
         fclose(symfile);
+
+        // oil file
+        oilfile = fopen((program + ".oil").c_str(), "w");
+        emit_il(parser::root);
+        fclose(oilfile);
         
         delete parser::root;
     }

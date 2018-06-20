@@ -96,6 +96,7 @@ BADSTRING       ((\"([^\\"\n]|\\[\\'"0nt])*)|(\"([^"\n])*\"))
 "while"         { return yylval_token (TOK_WHILE); }
 "return"        { return yylval_token (TOK_RETURN); }
 "int"           { return yylval_token (TOK_INT); }
+"char"           { return yylval_token (TOK_CHAR); }
 "string"        { return yylval_token (TOK_STRING); }
 "struct"        { return yylval_token (TOK_STRUCT); }
 "void"          { return yylval_token (TOK_VOID); }

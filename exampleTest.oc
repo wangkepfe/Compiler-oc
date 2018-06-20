@@ -1,15 +1,51 @@
 #include "oclib.h"
 
+int glb = 1;
+
 struct node{
     int foo;
-    node link;
+    string foostr;
+    node foonode;
+    int[] bar;
+    string[] barstr;
+    node[] barnode;
 }
 
 node func(node head, int length){
-    int a = 0;
-    string b = "";
-    node c = new node;
+    int a = 5;
+    int aa = 0x4F;
+    int aaa = 023;
+    int[] nullint = null;
+    string b = "hi";
+    string b2 = "hello";
+    node c = head;
+    int d = (a + length) * a;
 
-    c = c.link;
+    int e = head.foo;
+    int[] f = head.bar;
+    int g = f[0];
 
+    while(a < d){
+        a = a + 1;
+    }
+
+    if(a > 1)
+        a = 5;
+
+    if(a > 2)
+        a = 6;
+    else
+        a = 3;
+
+    node headache = new node;
+    string str = new string(10);
+    string str2 = new string[15];
+    int[] array = new int[4];
+    string[] p_str = new string[][2];
+    node[] p_list = new node[5];
+
+    int res = add(a, d + 2);
+    print_info();
+
+    return head;
 }
